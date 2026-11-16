@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survei Kepuasan Masyarakat (SKM) - Pelayanan Kelurahan</title>
+<style>
+  html { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    text-align: left;
+    font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    background: #eef2f7;
+    color: #1e293b;
+    margin: 0;
+    padding: 0;
+  }
+  .topbar {
+    background: #1e3a8a;
+    color: white;
+    padding: 22px 16px 20px;
+    text-align: center;
+  }
+  .topbar h1 { margin: 0; font-size: 22px; line-height: 1.3; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 16px 14px 60px; }
+  .card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 14px 0;
+    box-shadow: 0 2px 12px rgba(15,23,42,.07);
+    border: 1px solid #e2e8f0;
+  }
+  .card h2 { margin: 0 0 4px; font-size: 17px; color: #1e3a8a; }
+  .card .sub { font-size: 13.5px; color: #64748b; margin: 0 0 12px; line-height: 1.5; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .grid2 { grid-template-columns: 1fr; } }
+  label.f { display: block; font-size: 13px; font-weight: 600; margin: 8px 0 5px; color: #334155; }
+  label.f span.req { color: #dc2626; }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1.5px solid #cbd5e1;
+    font-size: 15px;
+    background: #f8fafc;
+    outline: none;
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus { border-color: #2563eb; background: #fff; }
+  textarea { min-height: 100px; resize: vertical; line-height: 1.5; }
+  .saran-count { font-size: 12px; color: #94a3b8; text-align: right; margin-top: 4px; }
+  .progress {
+    position: sticky; top: 0; z-index: 5;
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 12px; padding: 10px 14px; margin-top: 14px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 2px 8px rgba(15,23,42,.06);
+  }
+  .progress .bar { flex: 1; height: 10px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+  .progress .fill { height: 100%; width: 0%; background: #22c55e; transition: width .25s; }
+  .progress b { font-size: 13px; white-space: nowrap; }
+  .q {
+    background: white; border: 1px solid #e2e8f0; border-radius: 14px;
+    padding: 16px; margin: 12px 0; box-shadow: 0 2px 12px rgba(15,23,42,.06);
+  }
+  .q.unanswered { border-color: #fca5a5; }
+  .q .qhead { display: flex; gap: 10px; align-items: flex-start; }
+  .q .num {
+    min-width: 32px; height: 32px; border-radius: 10px;
+    background: #1e3a8a; color: #fff; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+  }
+  .q .qtext { font-size: 15px; font-weight: 600; line-height: 1.5; margin: 2px 0 12px; }
+  /* Termostat: teks DI DALAM bar warna */
+  .scale { display: flex; gap: 0; border: none; border-radius: 14px; overflow: hidden; background: transparent; box-shadow: 0 2px 8px rgba(15,23,42,.12); }
+  .emots { display: flex; justify-content: space-around; align-items: center; margin: 4px 0 10px; }
+  .emot { font-size: 36px; line-height: 1; cursor: pointer; filter: grayscale(1); opacity: .35; transition: transform .15s ease, opacity .15s, filter .15s; user-select: none; }
+  .emot:hover { transform: scale(1.18); opacity: .8; }
+  .emot.selected { filter: none; opacity: 1; transform: scale(1.3); }
+  .opt {
+    flex: 1; min-width: 0; border: none; border-radius: 0;
+    padding: 12px 4px; text-align: center; cursor: pointer;
+    transition: filter .15s ease, transform .15s ease;
+    user-select: none; position: relative;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    color: #fff;
+  }
+  .opt:first-child { border-left: none; }
+  .opt::before { display: none; }
+  .opt.v1 { background: #ef4444; }
+  .opt.v2 { background: #f97316; }
+  .opt.v3 { background: #eab308; }
+  .opt.v4 { background: #22c55e; }
+  .opt:hover { filter: brightness(1.07); }
+  .opt:hover .n { transform: scale(1.1); }
+  .opt:active .n { transform: scale(.95); }
+  .opt.selected { z-index: 1; filter: brightness(1.02); box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 5px rgba(0,0,0,.28), 0 4px 14px rgba(0,0,0,.25); }
+  .opt .n {
+    display: inline-flex; width: 24px; height: 24px; border-radius: 50%; font-size: 12px;
+    font-weight: 900; align-items: center; justify-content: center; margin-bottom: 0; flex-shrink: 0;
+    transition: transform .15s ease; border: 2px solid rgba(255,255,255,.95);
+    background: rgba(255,255,255,.22); color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.3); text-shadow: none;
+  }
+  .opt.selected .n { background: #fff; }
+  /* Warna skala: 1 merah, 2 oranye, 3 kuning, 4 hijau */
+  .opt.v1.selected .n { color: #dc2626; }
+  .opt.v2.selected .n { color: #ea580c; }
+  .opt.v3.selected .n { color: #a16207; }
+  .opt.v4.selected .n { color: #16a34a; }
+  .opt .l { font-size: clamp(9px,2.4vw,11px); font-weight: 800; line-height: 1.2; letter-spacing: .01em; color: #fff; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+  .legend {
+    display: flex; gap: 0; margin-top: 10px;
+    font-size: 12px; text-align: center;
+    border: none; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(15,23,42,.12);
+  }
+  .legend > div { flex: 1; min-width: 0; border: none; padding: 10px 2px; position: relative; display: flex; align-items: center; justify-content: center; gap: 5px; color: #fff; }
+  .legend > div + div { border-left: 1px solid rgba(255,255,255,.5); }
+  .legend .leg-bar { display: none; }
+  .legend .leg1 { background: #ef4444; }
+  .legend .leg2 { background: #f97316; }
+  .legend .leg3 { background: #eab308; }
+  .legend .leg4 { background: #22c55e; }
+  .legend b { font-size: 14px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+  .legend .t { white-space: nowrap; font-size: clamp(9px,2.4vw,11px); font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+  .btnrow { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  button {
+    border: none; border-radius: 12px; padding: 13px 18px;
+    font-size: 15px; font-weight: 800; cursor: pointer;
+  }
+  .primary { background: #2563eb; color: #ffffff !important; flex: 1; min-width: 180px; }
+  .primary:disabled { background: #94a3b8; cursor: not-allowed; }
+  .ghost { background: #e2e8f0; color: #1e293b; }
+  .thanks { text-align: center; padding: 50px 24px; }
+  .thanks .big { font-size: 64px; line-height: 1; }
+  .thanks h2 { margin: 16px 0 8px; font-size: 22px; color: #1e3a8a; }
+  .thanks p { color: #64748b; font-size: 14px; }
+  .hint { font-size: 12.5px; color: #64748b; line-height: 1.6; }
+  .consent { display: flex; gap: 10px; align-items: flex-start; background: #fff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 12px 14px; margin-top: 12px; font-size: 13.5px; line-height: 1.6; cursor: pointer; }
+  .consent input { width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; accent-color: #2563eb; cursor: pointer; }
+  .consent.error { border-color: #ef4444; background: #fef2f2; }
+  .foot { text-align: center; font-size: 12px; letter-spacing: .06em; color: #94a3b8; margin: 22px 0 6px; text-transform: uppercase; }
+  .warn { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; margin-top: 10px; display: none; }
+  .warn.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Survei Kepuasan Masyarakat (SKM)<br>Pelayanan Kelurahan</h1>
+</div>
+
+<div class="wrap">
+  <div id="formView">
+    <div class="progress">
+      <b id="progressTxt">0/9 terjawab</b>
+      <div class="bar"><div class="fill" id="progressFill"></div></div>
+      <b id="progressPct">0%</b>
+    </div>
+
+    <div class="card">
+      <p class="sub" style="margin:0">Berikan penilaian Anda terhadap pelayanan yang diterima dengan skala <b>1&ndash;4</b>. Hasil survei digunakan untuk perbaikan kualitas pelayanan.</p>
+    </div>
+
+    <div class="card">
+      <h2>Data Responden</h2>
+      <p class="sub">Boleh diisi atau dikosongkan (anonim). Data hanya untuk klasifikasi hasil survei.</p>
+      <div class="grid2">
+        <div>
+          <label class="f" for="namaInput">Nama (opsional)</label>
+          <input type="text" id="namaInput" placeholder="cth: Budi Santoso — kosongkan jika anonim" autocomplete="name">
+        </div>
+        <div>
+          <label class="f" for="usiaInput">Usia (opsional)</label>
+          <input type="number" id="usiaInput" min="10" max="120" placeholder="cth: 30">
+        </div>
+        <div>
+          <label class="f" for="jkInput">Jenis Kelamin (opsional)</label>
+          <select id="jkInput"><option value="">-- Pilih --</option></select>
+        </div>
+        <div>
+          <label class="f" for="pendidikanInput">Pendidikan (opsional)</label>
+          <select id="pendidikanInput"><option value="">-- Pilih --</option></select>
+        </div>
+        <div>
+          <label class="f" for="pekerjaanInput">Pekerjaan (opsional)</label>
+          <select id="pekerjaanInput"><option value="">-- Pilih --</option></select>
+        </div>
+        <div>
+          <label class="f" for="layananInput">Jenis Layanan yang Diterima <span class="req">*</span></label>
+          <select id="layananInput"><option value="">-- Pilih --</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Petunjuk Pengisian</h2>
+      <p class="sub" style="margin:0">Pilih salah satu nilai untuk setiap pertanyaan:</p>
+      <div class="legend">
+        <div class="leg1"><b>1</b><div class="t">Tidak Baik</div></div>
+        <div class="leg2"><b>2</b><div class="t">Kurang Baik</div></div>
+        <div class="leg3"><b>3</b><div class="t">Baik</div></div>
+        <div class="leg4"><b>4</b><div class="t">Sangat Baik</div></div>
+      </div>
+    </div>
+
+    <div id="qCtn"></div>
+
+    <div class="card">
+      <h2>Kritik dan Saran</h2>
+      <p class="sub">Tulis masukan Anda untuk perbaikan pelayanan kelurahan (opsional, maks 500 karakter).</p>
+      <textarea id="saranInput" maxlength="500" placeholder="cth: Pelayanan sudah baik, mohon pertahankan keramahan petugas dan percepat waktu pengurusan KTP..."></textarea>
+      <div class="saran-count" id="saranCount">0/500</div>
+    </div>
+
+    <div class="warn" id="warnEl"></div>
+
+    <label class="consent" id="consentBox">
+      <input type="checkbox" id="setujuInput">
+      <span>Saya menyatakan bahwa jawaban survei ini saya berikan dengan <b>jujur</b> sesuai pengalaman pelayanan yang saya terima. <span class="req">*</span></span>
+    </label>
+
+    <div class="btnrow">
+      <button class="primary" id="kirimBtn">Kirim Jawaban Survei</button>
+      <button class="ghost" id="ulangBtn" type="button">Ulangi</button>
+    </div>
+    <p class="hint">Jawaban Anda bersifat anonim dan hanya digunakan untuk perbaikan kualitas pelayanan.</p>
+  </div>
+
+  <div id="thanksView" hidden>
+    <div class="card thanks">
+      <div class="big">✅</div>
+      <h2>Terima kasih atas penilaian Anda!</h2>
+    </div>
+  </div>
+
+  <div class="foot">PermenPANRB No. 14 Tahun 2017 &bull; 9 Unsur</div>
+</div>
+
+<script>
+/* ============================================================
+ * KONFIGURASI — WAJIB DIISI agar jawaban tersimpan ke Sheet.
+ * Tempel Web App URL dari Apps Script (Deploy > New deployment
+ * > Web app) di antara tanda kutip di bawah ini.
+ * Lihat README.md untuk langkah lengkap.
+ * ============================================================ */
+var APPS_SCRIPT_URL = ""; // cth: "https://script.google.com/macros/s/AKfyc.../exec"
+
+var QS = [
+  "Bagaimana pendapat Anda mengenai kesesuaian persyaratan pelayanan dengan jenis pelayanan yang diberikan?",
+  "Bagaimana kemudahan prosedur pelayanan di kelurahan?",
+  "Bagaimana kecepatan waktu petugas dalam menyelesaikan pelayanan?",
+  "Bagaimana kewajaran biaya/tarif pelayanan yang diberikan?",
+  "Bagaimana kesesuaian hasil pelayanan dengan permohonan Anda?",
+  "Bagaimana kemampuan dan kompetensi petugas dalam memberikan pelayanan?",
+  "Bagaimana kesopanan dan keramahan petugas dalam melayani masyarakat?",
+  "Bagaimana kualitas penanganan pengaduan, saran, dan masukan masyarakat?",
+  "Bagaimana kondisi sarana dan prasarana pelayanan di kelurahan?"
+];
+var SKALA = { 1: "Tidak Baik", 2: "Kurang Baik", 3: "Baik", 4: "Sangat Baik" };
+var EMOT = { 1: "😡", 2: "😕", 3: "🙂", 4: "😍" };
+var JK = ["Laki-laki", "Perempuan"];
+var PENDIDIKAN = ["SD", "SMP", "SMA/SMK", "Diploma", "S1", "S2/S3"];
+var PEKERJAAN = ["PNS/TNI/Polri", "Pegawai Swasta", "Wiraswasta", "Pelajar/Mahasiswa", "Ibu Rumah Tangga", "Lainnya"];
+var LAYANAN = ["KTP / KK / KIA", "Surat Keterangan Domisili", "Surat Keterangan Usaha", "Surat Pengantar SKCK", "Surat Keterangan Tidak Mampu", "Legalisasi / Pengantar Umum", "Lainnya"];
+
+var answers = [0,0,0,0,0,0,0,0,0];
+
+function fillSelect(id, items) {
+  var el = document.getElementById(id);
+  items.forEach(function (v) {
+    var o = document.createElement("option");
+    o.value = v; o.textContent = v;
+    el.appendChild(o);
+  });
+}
+
+function buildQuestions() {
+  var ctn = document.getElementById("qCtn");
+  ctn.innerHTML = "";
+  QS.forEach(function (q, i) {
+    var d = document.createElement("div");
+    d.className = "q"; d.id = "q" + i;
+    var opts = "", emots = "";
+    for (var n = 1; n <= 4; n++) {
+      opts += '<div class="opt v' + n + '" id="q' + i + 'o' + n + '" data-i="' + i + '" data-n="' + n + '"><div class="n">' + n + '</div><div class="l">' + SKALA[n] + '</div></div>';
+      emots += '<span class="emot" id="q' + i + 'e' + n + '" data-i="' + i + '" data-n="' + n + '" title="' + n + ' - ' + SKALA[n] + '">' + EMOT[n] + '</span>';
+    }
+    d.innerHTML = '<div class="qhead"><div class="num">' + (i + 1) + '</div><div class="qtext">' + escapeHtml(q) + '</div></div><div class="emots">' + emots + '</div><div class="scale">' + opts + '</div>';
+    ctn.appendChild(d);
+  });
+  ctn.addEventListener("click", function (ev) {
+    var t = ev.target.closest("[data-i][data-n]");
+    if (t) pilih(Number(t.getAttribute("data-i")), Number(t.getAttribute("data-n")));
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+  });
+}
+
+function pilih(i, n) {
+  answers[i] = n;
+  for (var k = 1; k <= 4; k++) {
+    document.getElementById("q" + i + "o" + k).classList.toggle("selected", k === n);
+    document.getElementById("q" + i + "e" + k).classList.toggle("selected", k === n);
+  }
+  document.getElementById("q" + i).classList.remove("unanswered");
+  updateProgress();
+}
+
+function updateProgress() {
+  var done = answers.filter(function (a) { return a > 0; }).length;
+  document.getElementById("progressTxt").textContent = done + "/9 terjawab";
+  var pct = Math.round(done / 9 * 100);
+  document.getElementById("progressPct").textContent = pct + "%";
+  document.getElementById("progressFill").style.width = pct + "%";
+}
+
+function validasi() {
+  var lay = document.getElementById("layananInput").value;
+  var setuju = document.getElementById("setujuInput").checked;
+  var belum = [];
+  answers.forEach(function (a, i) { if (!a) belum.push(i + 1); });
+  var warn = document.getElementById("warnEl");
+  var box = document.getElementById("consentBox");
+  box.classList.toggle("error", !setuju);
+  if (!lay || belum.length || !setuju) {
+    var msg = "";
+    if (!lay) msg += "Pilih <b>Jenis Layanan yang Diterima</b>. ";
+    if (belum.length) msg += "Pertanyaan belum dijawab: <b>No. " + belum.join(", ") + "</b>. ";
+    if (!setuju) msg += "Centang <b>persetujuan</b> di bawah sebelum mengirim.";
+    warn.innerHTML = "⚠ " + msg;
+    warn.classList.add("show");
+    if (!lay) document.getElementById("layananInput").focus();
+    if (belum.length) {
+      belum.forEach(function (n) { document.getElementById("q" + (n - 1)).classList.add("unanswered"); });
+      document.getElementById("q" + (belum[0] - 1)).scrollIntoView({ behavior: "smooth", block: "center" });
+    } else if (!setuju) {
+      box.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    return null;
+  }
+  warn.classList.remove("show");
+  return {
+    profil: {
+      nama: document.getElementById("namaInput").value.trim(),
+      usia: document.getElementById("usiaInput").value.trim(),
+      jk: document.getElementById("jkInput").value,
+      pendidikan: document.getElementById("pendidikanInput").value,
+      pekerjaan: document.getElementById("pekerjaanInput").value,
+      layanan: lay
+    },
+    answers: answers.slice(),
+    saran: document.getElementById("saranInput").value.trim()
+  };
+}
+
+function kirimSurvei() {
+  var data = validasi();
+  if (!data) return;
+  var btn = document.getElementById("kirimBtn");
+  btn.disabled = true;
+  btn.textContent = "Mengirim...";
+  var selesai = function () {
+    document.getElementById("formView").hidden = true;
+    document.getElementById("thanksView").hidden = false;
+    window.scrollTo(0, 0);
+  };
+  if (!APPS_SCRIPT_URL) { selesai(); return; } // mode demo: tanpa backend
+  // text/plain agar tidak kena preflight CORS; respons tak terbaca (no-cors) tapi data tetap tercatat.
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(data)
+  }).then(selesai, selesai);
+}
+
+function resetForm() {
+  answers = [0,0,0,0,0,0,0,0,0];
+  document.querySelectorAll(".opt.selected").forEach(function (e) { e.classList.remove("selected"); });
+  document.querySelectorAll(".emot.selected").forEach(function (e) { e.classList.remove("selected"); });
+  document.querySelectorAll(".q.unanswered").forEach(function (e) { e.classList.remove("unanswered"); });
+  ["namaInput", "usiaInput"].forEach(function (id) { document.getElementById(id).value = ""; });
+  ["jkInput", "pendidikanInput", "pekerjaanInput", "layananInput"].forEach(function (id) { document.getElementById(id).value = ""; });
+  document.getElementById("saranInput").value = "";
+  document.getElementById("saranCount").textContent = "0/500";
+  document.getElementById("setujuInput").checked = false;
+  document.getElementById("consentBox").classList.remove("error");
+  document.getElementById("warnEl").classList.remove("show");
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+document.getElementById("saranInput").addEventListener("input", function () {
+  document.getElementById("saranCount").textContent = this.value.length + "/500";
+});
+document.getElementById("kirimBtn").addEventListener("click", kirimSurvei);
+document.getElementById("ulangBtn").addEventListener("click", resetForm);
+
+fillSelect("jkInput", JK);
+fillSelect("pendidikanInput", PENDIDIKAN);
+fillSelect("pekerjaanInput", PEKERJAAN);
+fillSelect("layananInput", LAYANAN);
+buildQuestions();
+updateProgress();
+</script>
+</body>
+</html>
